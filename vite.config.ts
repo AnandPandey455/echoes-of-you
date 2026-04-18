@@ -5,9 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // For GitHub Pages project sites, assets must be served from /<repo-name>/.
-  // Use "./" so the build works on both root domains and subpath deployments.
-  base: mode === "production" ? "./" : "/",
+  base: mode === "production" ? "/echoes-of-you/" : "/",  // 👈 CHANGED
   server: {
     host: "::",
     port: 8080,
