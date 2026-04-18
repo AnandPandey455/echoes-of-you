@@ -20,11 +20,11 @@
   <body>
     <div id="root"></div>
     <!--
-      Background music: set the `src` below to your audio file.
-      Place the file in the `public/` folder and reference it like "/song.mp3".
-      Leave src empty to disable the music button entirely.
+      Background music: place your audio file in the `public/` folder
+      (e.g. public/song.mp3) and reference it as "./song.mp3" so it works
+      on GitHub Pages project sites. Leave src empty to hide the button.
     -->
-    <audio id="bg-music" src="" preload="https://github.com/AnandPandey455/echoes-of-you/blob/48edba46365d93e8ef1d32a2132105156ccde210/keane(where%20have%20you%20been).mp3" loop></audio>
+    <audio id="bg-music" src="./keane-where-have-you-been.mp3" preload="auto" loop></audio>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
