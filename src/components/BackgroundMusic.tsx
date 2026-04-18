@@ -1,56 +1,43 @@
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { Play, Pause, Music } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 /**
- * Background music controller.
+ * Background music auto-player.
  *
  * To set the song, edit the <audio id="bg-music"> tag in index.html and
  * change its `src` to point to your audio file (relative paths supported,
  * e.g. "/music/song.mp3" if you place it in the public/ folder).
  *
- * Browser autoplay policy: playback only starts after the user clicks Play.
+ * The audio will auto-play when the page loads.
  */
 export const BackgroundMusic = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [available, setAvailable] = useState(false);
 
   useEffect(() => {
     const el = document.getElementById("bg-music") as HTMLAudioElement | null;
     audioRef.current = el;
     if (el && el.getAttribute("src")) {
-      setAvailable(true);
       el.loop = true;
       el.volume = 0.5;
+      
+      // Attempt to auto-play
+      const playPromise = el.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Auto-play failed, will require user interaction
+          console.log("Auto-play failed. Audio will start on first user interaction.");
+          // Listen for user interaction to play
+          const playOnInteraction = () => {
+            el.play().catch(() => {});
+            document.removeEventListener("click", playOnInteraction);
+            document.removeEventListener("keydown", playOnInteraction);
+          };
+          document.addEventListener("click", playOnInteraction);
+          document.addEventListener("keydown", playOnInteraction);
+        });
+      }
     }
   }, []);
 
-  const toggle = () => {
-    const el = audioRef.current;
-    if (!el) return;
-    if (playing) {
-      el.pause();
-      setPlaying(false);
-    } else {
-      el.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-    }
-  };
-
-  if (!available) return null;
-
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 4.5, duration: 0.8 }}
-      whileHover={{ scale: 1.08 }}
-      whileTap={{ scale: 0.94 }}
-      onClick={toggle}
-      className="fixed bottom-5 right-5 z-50 w-12 h-12 rounded-full bg-card/70 backdrop-blur-md border border-border flex items-center justify-center text-primary glow-soft"
-      aria-label={playing ? "Pause music" : "Play music"}
-    >
-      {playing ? <Pause size={18} /> : <Music size={18} />}
-    </motion.button>
-  );
+  // This component doesn't render anything, just controls the audio
+  return null;
 };
