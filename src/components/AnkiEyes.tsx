@@ -1,11 +1,11 @@
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, MotionValue } from "framer-motion";
+import { motion, AnimatePresence, MotionValue } from "framer-motion";
 import { useMemo } from "react";
 import { PoemSection } from "@/context/PoemContext";
 
 interface AnkiEyesProps {
   size?: number;
   section?: PoemSection;
-  /** Optional scroll progress (0-1) used for "reading" eye movement. */
+  /** Optional scroll progress (kept for API compatibility, no longer used for gaze). */
   scrollProgress?: MotionValue<number>;
   className?: string;
 }
@@ -21,53 +21,54 @@ interface EyeConfig {
   droopy?: boolean;
   crying?: boolean;
   gazeX?: number;
+  /** Additional vertical pupil/iris bias to simulate looking down while reading. */
+  lookDown?: boolean;
 }
 
 /**
  * Anki-Vector style eyes: solid glowing rounded shapes (no pupils).
  * Expressions come from scaling/skewing the eye shape itself.
  */
-export const AnkiEyes = ({ size = 280, section = "intro", scrollProgress, className = "" }: AnkiEyesProps) => {
+export const AnkiEyes = ({ size = 280, section = "intro", className = "" }: AnkiEyesProps) => {
   const config: EyeConfig = useMemo(() => {
     switch (section) {
       case "verse1":
-        // Happy: squinted arches
         return { eyeScaleY: 0.55, eyeScaleX: 1.05, eyeRadius: 50, skewY: 0, translateY: 2, blinkInterval: 4, happy: true };
       case "chorus":
-        // Sad: heavier eyes, droopy outer corners
-        return { eyeScaleY: 1.1, eyeScaleX: 1, eyeRadius: 38, skewY: 6, translateY: 4, blinkInterval: 6, droopy: true };
+        return { eyeScaleY: 1.1, eyeScaleX: 1, eyeRadius: 38, skewY: 6, translateY: 4, blinkInterval: 6, droopy: true, lookDown: true };
       case "verse2":
-        return { eyeScaleY: 0.95, eyeScaleX: 1, eyeRadius: 38, skewY: 0, translateY: 0, blinkInterval: 5, gazeX: -8 };
-      case "bridge":
         return { eyeScaleY: 0.95, eyeScaleX: 1, eyeRadius: 38, skewY: 0, translateY: 0, blinkInterval: 5, gazeX: -10 };
+      case "bridge":
+        return { eyeScaleY: 0.95, eyeScaleX: 1, eyeRadius: 38, skewY: 0, translateY: 0, blinkInterval: 5, gazeX: -12 };
       case "outro":
-        return { eyeScaleY: 1, eyeScaleX: 1, eyeRadius: 38, skewY: 0, translateY: 2, blinkInterval: 5, crying: true };
+        return { eyeScaleY: 1, eyeScaleX: 1, eyeRadius: 38, skewY: 0, translateY: 2, blinkInterval: 5, crying: true, lookDown: true };
       default:
+        // intro: neutral, no reading sweep
         return { eyeScaleY: 1, eyeScaleX: 1, eyeRadius: 38, skewY: 0, translateY: 0, blinkInterval: 4 };
     }
   }, [section]);
 
-  // Reading animation: eyes look downward and sweep left→right repeatedly like reading a webpage line.
-  // Independent of scroll so it always feels alive.
-  const fallback = useMotionValue(0);
-  const scroll = scrollProgress ?? fallback;
-  const readingSweep = useMotionValue(-10);
-  const smoothX = useSpring(readingSweep, { stiffness: 60, damping: 20 });
-
-  // Drive the sweep with an interval-like loop using framer-motion animate
-  // Use a simple effect-free approach: animate via useTransform on scroll fallback won't loop,
-  // so we rely on the parent motion.div animate prop below for the sweep.
   const overrideGaze = config.gazeX !== undefined;
+  const isReading = section !== "intro" && !overrideGaze;
+
+  // Reading sweep: smoothly pan left→right→left, like scanning a line of text.
+  const sweepX = isReading ? [-14, 14, -14] : overrideGaze ? config.gazeX ?? 0 : 0;
+  const sweepTransition = isReading
+    ? { x: { duration: 2.8, repeat: Infinity, ease: "easeInOut" as const } }
+    : { x: { type: "spring" as const, stiffness: 80, damping: 18 } };
 
   return (
     <div className={`relative ${className}`} style={{ width: size, height: size * 0.6 }}>
       <motion.div
         className="absolute inset-0 flex items-center justify-center gap-[12%]"
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ y: [0, -6, 0], x: sweepX }}
+        transition={{
+          y: { duration: 3.5, repeat: Infinity, ease: "easeInOut" },
+          ...sweepTransition,
+        }}
       >
-        <Eye config={config} smoothX={smoothX} overrideGaze={overrideGaze} side="left" />
-        <Eye config={config} smoothX={smoothX} overrideGaze={overrideGaze} side="right" />
+        <Eye config={config} side="left" />
+        <Eye config={config} side="right" />
       </motion.div>
 
       <AnimatePresence>
@@ -83,24 +84,20 @@ export const AnkiEyes = ({ size = 280, section = "intro", scrollProgress, classN
 
 interface EyeProps {
   config: EyeConfig;
-  smoothX: MotionValue<number>;
-  overrideGaze: boolean;
   side: "left" | "right";
 }
 
-const Eye = ({ config, smoothX, overrideGaze, side }: EyeProps) => {
+const Eye = ({ config, side }: EyeProps) => {
   const blinkControls = useBlink(config.blinkInterval);
-
-  // Combine scroll + emotional gaze on the whole eye container
-  const x = useTransform(smoothX, (v) => (overrideGaze ? (config.gazeX ?? 0) : v));
-
-  // Mirror skew on right eye for symmetric droop
   const skewY = side === "left" ? config.skewY : -config.skewY;
+
+  // Looking down: nudge the inner highlight core lower so the "gaze" reads as downward.
+  const coreOffsetY = config.lookDown ? "12%" : "0%";
 
   return (
     <motion.div
       className="relative"
-      style={{ width: "38%", aspectRatio: "1 / 1.15", x, y: config.translateY }}
+      style={{ width: "38%", aspectRatio: "1 / 1.15", y: config.translateY }}
       animate={{
         scaleY: config.eyeScaleY,
         scaleX: config.eyeScaleX,
@@ -108,7 +105,6 @@ const Eye = ({ config, smoothX, overrideGaze, side }: EyeProps) => {
       }}
       transition={{ type: "spring", stiffness: 110, damping: 16 }}
     >
-      {/* Solid glowing eye body — no pupil */}
       <motion.div
         className="absolute inset-0 glow-eye overflow-hidden"
         style={{
@@ -117,12 +113,13 @@ const Eye = ({ config, smoothX, overrideGaze, side }: EyeProps) => {
         }}
         animate={blinkControls}
       >
-        {/* Inner brightness core */}
+        {/* Inner brightness core — shifts down for "looking down" gaze */}
         <div
-          className="absolute inset-[8%] rounded-[inherit] opacity-70"
+          className="absolute inset-[8%] rounded-[inherit] opacity-70 transition-transform duration-700"
           style={{
             background:
               "radial-gradient(circle at 40% 35%, hsl(195 100% 92% / 0.9) 0%, hsl(195 100% 80% / 0.3) 35%, transparent 70%)",
+            transform: `translateY(${coreOffsetY})`,
           }}
         />
         {/* Top specular highlight */}
@@ -142,7 +139,6 @@ const Eye = ({ config, smoothX, overrideGaze, side }: EyeProps) => {
           }}
         />
 
-        {/* Sad lid — covers top portion, angled outward */}
         {config.droopy && (
           <div
             className="absolute -top-[8%] left-0 right-0 h-[45%]"
@@ -155,7 +151,6 @@ const Eye = ({ config, smoothX, overrideGaze, side }: EyeProps) => {
           />
         )}
 
-        {/* Crying glassy sheen */}
         {config.crying && (
           <div className="absolute inset-0 rounded-[inherit] bg-gradient-to-b from-eye-tear/40 via-transparent to-eye-tear/30" />
         )}
@@ -164,7 +159,6 @@ const Eye = ({ config, smoothX, overrideGaze, side }: EyeProps) => {
   );
 };
 
-/** Blink keyframe — eyes squish shut briefly. */
 const useBlink = (interval: number) => {
   return {
     scaleY: [1, 1, 0.05, 1],
@@ -177,22 +171,41 @@ const useBlink = (interval: number) => {
   };
 };
 
+/**
+ * Hearts pop from AROUND the eyes (a ring/halo at distance), not from inside them.
+ * We expand outside the parent bounds using negative insets and overflow-visible.
+ */
 const HeartBurst = () => {
-  const hearts = Array.from({ length: 8 });
+  const hearts = Array.from({ length: 10 });
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-visible">
+    <div className="pointer-events-none absolute -inset-[60%] overflow-visible">
       {hearts.map((_, i) => {
-        const left = 20 + Math.random() * 60;
-        const delay = i * 0.12;
-        const drift = (Math.random() - 0.5) * 60;
+        // Distribute around a ring at distance from the eyes
+        const angle = (i / hearts.length) * Math.PI * 2 + Math.random() * 0.4;
+        const radius = 38 + Math.random() * 14; // % of container
+        const startX = 50 + Math.cos(angle) * radius;
+        const startY = 50 + Math.sin(angle) * radius;
+        const drift = Math.cos(angle) * 30;
+        const delay = i * 0.18 + Math.random() * 0.3;
+        const fontSize = 18 + Math.random() * 14;
         return (
           <motion.div
             key={i}
             className="absolute text-heart"
-            style={{ left: `${left}%`, top: "40%", fontSize: 22 }}
-            initial={{ opacity: 0, y: 0, scale: 0.4 }}
-            animate={{ opacity: [0, 1, 0], y: -120, x: drift, scale: [0.4, 1.1, 0.8] }}
-            transition={{ duration: 2.4, delay, ease: "easeOut" }}
+            style={{
+              left: `${startX}%`,
+              top: `${startY}%`,
+              fontSize,
+              filter: "drop-shadow(0 0 8px hsl(var(--heart) / 0.6))",
+            }}
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{
+              opacity: [0, 1, 1, 0],
+              y: [0, -40, -90],
+              x: [0, drift * 0.5, drift],
+              scale: [0.3, 1.1, 0.9],
+            }}
+            transition={{ duration: 2.8, delay, ease: "easeOut", repeat: Infinity, repeatDelay: 1.2 }}
           >
             ♥
           </motion.div>
