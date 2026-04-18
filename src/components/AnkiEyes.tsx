@@ -93,9 +93,10 @@ export const AnkiEyes = ({ size = 280, section = "intro", className = "" }: Anki
 interface EyeProps {
   config: EyeConfig;
   side: "left" | "right";
+  sizeBias?: number;
 }
 
-const Eye = ({ config, side }: EyeProps) => {
+const Eye = ({ config, side, sizeBias = 1 }: EyeProps) => {
   const blinkControls = useBlink(config.blinkInterval);
   const skewY = side === "left" ? config.skewY : -config.skewY;
 
@@ -107,8 +108,8 @@ const Eye = ({ config, side }: EyeProps) => {
       className="relative"
       style={{ width: "38%", aspectRatio: "1 / 1.15", y: config.translateY }}
       animate={{
-        scaleY: config.eyeScaleY,
-        scaleX: config.eyeScaleX,
+        scaleY: config.eyeScaleY * sizeBias,
+        scaleX: config.eyeScaleX * sizeBias,
         skewY,
       }}
       transition={{ type: "spring", stiffness: 110, damping: 16 }}
