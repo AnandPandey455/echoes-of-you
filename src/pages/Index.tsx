@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useScroll } from "framer-motion";
 import { AnkiEyes } from "@/components/AnkiEyes";
 import { PoemProvider, usePoem } from "@/context/PoemContext";
 import { PoemSectionView } from "@/components/PoemSectionView";
-import { MusicUploader } from "@/components/MusicUploader";
+import { BackgroundMusic } from "@/components/BackgroundMusic";
 
 const POEM = [
   {
