@@ -8,12 +8,12 @@ import { BackgroundMusic } from "@/components/BackgroundMusic";
 const POEM = [
   {
     id: "verse1" as const,
-    title: "Verse I",
+    title: "Verse 1",
     lines: [
       "Where have you been, my heart?",
-      "I searched for you in every part.",
-      "My eyes grew numb, my soul grew weary,",
-      "Heavy with silence, the days grew dreary.",
+      "I looked for you in every part.",
+      "Through quiet days and skies of gray,",
+      "I held your thought along the way.",
     ],
   },
   {
@@ -21,37 +21,37 @@ const POEM = [
     title: "Chorus",
     lines: [
       "I said good morning, wished you light,",
-      "Hoping you'd make my world feel bright.",
-      "But you took it light, with words of your own,",
-      "And I listened closely, though my voice was unknown.",
+      "You drifted into your own sunlight.",
+      "I stayed a while, just listening through,",
+      "Holding the space I made for you.",
     ],
   },
   {
     id: "verse2" as const,
-    title: "Verse II",
+    title: "Verse 2",
     lines: [
-      "Hardly you asked how my skies unfold,",
-      "If my day was warm, or if it turned cold.",
-      "I carried the weight, I held it inside,",
-      "Waiting for your care to turn the tide.",
+      "Sometimes I wonder how you are,",
+      "If your days drift near or far.",
+      "I keep my thoughts, I let them stay,",
+      "Waiting for you in your own way.",
     ],
   },
   {
     id: "bridge" as const,
     title: "Bridge",
     lines: [
-      "My heart beats steady, my voice stays true,",
-      "Even when you don't ask what I've been through.",
+      "My heart stays steady, calm and true,",
+      "Even in silence, it leans to you.",
     ],
   },
   {
     id: "outro" as const,
     title: "Outro",
     lines: [
-      "So here I stand, with hope unspoken,",
-      "A song for you, though left unbroken.",
+      "So here I stand, no need to hide,",
+      "With quiet hope I hold inside.",
       "Where have you been, my heart so true?",
-      "I searched the world, and found it's only you.",
+      "I looked around… and found you.",
     ],
   },
 ];
