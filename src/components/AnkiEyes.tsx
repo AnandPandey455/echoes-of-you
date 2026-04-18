@@ -47,12 +47,16 @@ export const AnkiEyes = ({ size = 280, section = "intro", scrollProgress, classN
     }
   }, [section]);
 
-  // Scroll-driven gaze (subtle horizontal drift while reading)
+  // Reading animation: eyes look downward and sweep left→right repeatedly like reading a webpage line.
+  // Independent of scroll so it always feels alive.
   const fallback = useMotionValue(0);
   const scroll = scrollProgress ?? fallback;
-  const readingX = useTransform(scroll, [0, 0.25, 0.5, 0.75, 1], [-6, 6, -6, 6, -4]);
-  const smoothX = useSpring(readingX, { stiffness: 80, damping: 18 });
+  const readingSweep = useMotionValue(-10);
+  const smoothX = useSpring(readingSweep, { stiffness: 60, damping: 20 });
 
+  // Drive the sweep with an interval-like loop using framer-motion animate
+  // Use a simple effect-free approach: animate via useTransform on scroll fallback won't loop,
+  // so we rely on the parent motion.div animate prop below for the sweep.
   const overrideGaze = config.gazeX !== undefined;
 
   return (
