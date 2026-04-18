@@ -8,7 +8,6 @@ import { BackgroundMusic } from "@/components/BackgroundMusic";
 const POEM = [
   {
     id: "verse1" as const,
-    title: "Verse 1",
     lines: [
       "Where have you been, my heart?",
       "I looked for you in every part.",
@@ -18,7 +17,6 @@ const POEM = [
   },
   {
     id: "chorus" as const,
-    title: "Chorus",
     lines: [
       "I said good morning, wished you light,",
       "You drifted into your own sunlight.",
@@ -28,7 +26,6 @@ const POEM = [
   },
   {
     id: "verse2" as const,
-    title: "Verse 2",
     lines: [
       "Sometimes I wonder how you are,",
       "If your days drift near or far.",
@@ -38,7 +35,6 @@ const POEM = [
   },
   {
     id: "bridge" as const,
-    title: "Bridge",
     lines: [
       "My heart stays steady, calm and true,",
       "Even in silence, it leans to you.",
@@ -46,7 +42,6 @@ const POEM = [
   },
   {
     id: "outro" as const,
-    title: "Outro",
     lines: [
       "So here I stand, no need to hide,",
       "With quiet hope I hold inside.",
