@@ -49,13 +49,21 @@ export const AnkiEyes = ({ size = 280, section = "intro", className = "" }: Anki
   }, [section]);
 
   const overrideGaze = config.gazeX !== undefined;
-  const isReading = section !== "intro" && !overrideGaze;
+  // Crying outro stays steady so tears align with the eyes; intro is also still.
+  const isReading = section !== "intro" && section !== "outro" && !overrideGaze;
 
   // Reading sweep: smoothly pan left→right→left, like scanning a line of text.
   const sweepX = isReading ? [-14, 14, -14] : overrideGaze ? config.gazeX ?? 0 : 0;
   const sweepTransition = isReading
     ? { x: { duration: 2.8, repeat: Infinity, ease: "easeInOut" as const } }
     : { x: { type: "spring" as const, stiffness: 80, damping: 18 } };
+
+  // When gazing sideways, asymmetrically scale eyes (near eye bigger, far eye smaller)
+  // to simulate perspective foreshortening of a head turn.
+  const gazingLeft = overrideGaze && (config.gazeX ?? 0) < 0;
+  const gazingRight = overrideGaze && (config.gazeX ?? 0) > 0;
+  const leftEyeBias = gazingLeft ? 1.18 : gazingRight ? 0.85 : 1;
+  const rightEyeBias = gazingLeft ? 0.85 : gazingRight ? 1.18 : 1;
 
   return (
     <div className={`relative ${className}`} style={{ width: size, height: size * 0.6 }}>
@@ -67,8 +75,8 @@ export const AnkiEyes = ({ size = 280, section = "intro", className = "" }: Anki
           ...sweepTransition,
         }}
       >
-        <Eye config={config} side="left" />
-        <Eye config={config} side="right" />
+        <Eye config={config} side="left" sizeBias={leftEyeBias} />
+        <Eye config={config} side="right" sizeBias={rightEyeBias} />
       </motion.div>
 
       <AnimatePresence>
@@ -85,9 +93,10 @@ export const AnkiEyes = ({ size = 280, section = "intro", className = "" }: Anki
 interface EyeProps {
   config: EyeConfig;
   side: "left" | "right";
+  sizeBias?: number;
 }
 
-const Eye = ({ config, side }: EyeProps) => {
+const Eye = ({ config, side, sizeBias = 1 }: EyeProps) => {
   const blinkControls = useBlink(config.blinkInterval);
   const skewY = side === "left" ? config.skewY : -config.skewY;
 
@@ -99,8 +108,8 @@ const Eye = ({ config, side }: EyeProps) => {
       className="relative"
       style={{ width: "38%", aspectRatio: "1 / 1.15", y: config.translateY }}
       animate={{
-        scaleY: config.eyeScaleY,
-        scaleX: config.eyeScaleX,
+        scaleY: config.eyeScaleY * sizeBias,
+        scaleX: config.eyeScaleX * sizeBias,
         skewY,
       }}
       transition={{ type: "spring", stiffness: 110, damping: 16 }}
