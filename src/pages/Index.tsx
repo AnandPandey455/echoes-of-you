@@ -60,16 +60,33 @@ const FixedReadingEyes = () => {
   const { active } = usePoem();
   const { scrollYProgress } = useScroll();
 
+  // When the eyes are "looking left" (verse2 / bridge), the whole island
+  // drifts to the bottom-left corner of the screen for a contemplative feel.
+  const isLookingLeft = active === "verse2" || active === "bridge";
+
   return (
     <AnimatePresence>
       {active !== "intro" && (
         <motion.div
           key="fixed-eyes"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.6 }}
-          className="fixed top-4 left-1/2 -translate-x-1/2 z-40 pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            top: isLookingLeft ? "auto" : "1rem",
+            bottom: isLookingLeft ? "1.5rem" : "auto",
+            left: isLookingLeft ? "1.5rem" : "50%",
+            x: isLookingLeft ? 0 : "-50%",
+          }}
+          exit={{ opacity: 0 }}
+          transition={{
+            opacity: { duration: 0.6 },
+            top: { duration: 0.8, ease: "easeInOut" },
+            bottom: { duration: 0.8, ease: "easeInOut" },
+            left: { type: "spring", stiffness: 70, damping: 20 },
+            x: { type: "spring", stiffness: 70, damping: 20 },
+          }}
+          className="fixed z-40 pointer-events-none"
+          style={{ top: "1rem", left: "50%" }}
         >
           <div className="bg-card/40 backdrop-blur-md rounded-full px-4 py-2 border border-border/50">
             <AnkiEyes size={90} section={active} scrollProgress={scrollYProgress} />
