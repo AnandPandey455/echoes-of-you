@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "/echoes-of-you/" : "/",  // 👈 CHANGED
+  base: "/echoes-of-you/",
   server: {
     host: "::",
     port: 8080,
@@ -19,5 +19,9 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
+  },
+  build: {
+    outDir: "dist",
+    sourcemap: false,
   },
 }));
