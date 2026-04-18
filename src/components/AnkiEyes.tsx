@@ -49,13 +49,21 @@ export const AnkiEyes = ({ size = 280, section = "intro", className = "" }: Anki
   }, [section]);
 
   const overrideGaze = config.gazeX !== undefined;
-  const isReading = section !== "intro" && !overrideGaze;
+  // Crying outro stays steady so tears align with the eyes; intro is also still.
+  const isReading = section !== "intro" && section !== "outro" && !overrideGaze;
 
   // Reading sweep: smoothly pan left→right→left, like scanning a line of text.
   const sweepX = isReading ? [-14, 14, -14] : overrideGaze ? config.gazeX ?? 0 : 0;
   const sweepTransition = isReading
     ? { x: { duration: 2.8, repeat: Infinity, ease: "easeInOut" as const } }
     : { x: { type: "spring" as const, stiffness: 80, damping: 18 } };
+
+  // When gazing sideways, asymmetrically scale eyes (near eye bigger, far eye smaller)
+  // to simulate perspective foreshortening of a head turn.
+  const gazingLeft = overrideGaze && (config.gazeX ?? 0) < 0;
+  const gazingRight = overrideGaze && (config.gazeX ?? 0) > 0;
+  const leftEyeBias = gazingLeft ? 1.18 : gazingRight ? 0.85 : 1;
+  const rightEyeBias = gazingLeft ? 0.85 : gazingRight ? 1.18 : 1;
 
   return (
     <div className={`relative ${className}`} style={{ width: size, height: size * 0.6 }}>
