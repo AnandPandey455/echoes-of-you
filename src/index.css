@@ -46,9 +46,9 @@
 
     /* Gradients */
     --gradient-bg: radial-gradient(ellipse at top, hsl(222 47% 12%) 0%, hsl(222 47% 5%) 60%, hsl(222 60% 3%) 100%);
-    --gradient-eye: radial-gradient(circle at 30% 30%, hsl(var(--eye-iris)) 0%, hsl(var(--eye-iris-soft)) 60%, hsl(199 90% 35%) 100%);
+    --gradient-eye: radial-gradient(circle at 35% 30%, hsl(195 100% 88%) 0%, hsl(var(--eye-iris)) 30%, hsl(var(--eye-iris-soft)) 70%, hsl(204 95% 40%) 100%);
     --gradient-text: linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(199 89% 75%) 100%);
-    --glow-eye: 0 0 40px hsl(var(--eye-glow) / 0.5), 0 0 80px hsl(var(--eye-glow) / 0.25);
+    --glow-eye: 0 0 30px hsl(var(--eye-glow) / 0.7), 0 0 70px hsl(var(--eye-glow) / 0.45), 0 0 120px hsl(var(--eye-glow) / 0.25), inset 0 0 25px hsl(195 100% 75% / 0.4);
     --glow-soft: 0 0 60px hsl(var(--eye-glow) / 0.15);
 
     --sidebar-background: 0 0% 98%;
