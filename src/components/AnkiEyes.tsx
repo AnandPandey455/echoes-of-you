@@ -75,8 +75,8 @@ export const AnkiEyes = ({ size = 280, section = "intro", className = "" }: Anki
           ...sweepTransition,
         }}
       >
-        <Eye config={config} side="left" />
-        <Eye config={config} side="right" />
+        <Eye config={config} side="left" sizeBias={leftEyeBias} />
+        <Eye config={config} side="right" sizeBias={rightEyeBias} />
       </motion.div>
 
       <AnimatePresence>
