@@ -187,7 +187,7 @@ const InnerPage = () => {
         — for you —
       </motion.footer>
 
-      <MusicUploader />
+      <BackgroundMusic />
     </main>
   );
 };
